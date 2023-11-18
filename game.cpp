@@ -25,7 +25,7 @@ void Game::loop() {
     font.loadFromFile("ARIAL.ttf");
     sf::Text text("200/200", font);
     text.setFillColor(sf::Color::Black);
-    text.setPosition(49, 20);
+    text.setPosition(490, 20);
     text.setCharacterSize(15);
 
 
