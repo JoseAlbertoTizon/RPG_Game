@@ -1,0 +1,3 @@
+C:/Users/josal/OneDrive/Área de Trabalho/RPG/cmake-build-debug/CMakeFiles/RPG.dir
+C:/Users/josal/OneDrive/Área de Trabalho/RPG/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/josal/OneDrive/Área de Trabalho/RPG/cmake-build-debug/CMakeFiles/rebuild_cache.dir
