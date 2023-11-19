@@ -1,7 +1,6 @@
 #include "game.hpp"
 #include <algorithm>
 #include <iostream>
-#include <cmath>
 
 Game::Game() {
     window.setFramerateLimit(60);
@@ -13,9 +12,12 @@ void Game::loop() {
     // Create background
     Background background("Background_Textures", "background_rpg_2");
 
+    // Create graph for movement
+    Graph graph;
+
     // Create main character
     Character character("Character_Sprites", "still_down");
-    character.sprite.setPosition(0, 0);
+    character.sprite.setPosition(100+8, 100-10);
 
     // Create skeleton vector
     std::vector<Enemy> skeletons;
@@ -24,90 +26,69 @@ void Game::loop() {
     skeletons[0].sprite.setPosition(100, 100);
     skeletons[1].sprite.setPosition(400, 200);
 
-
-    sf::CircleShape circle(50);
-    circle.setFillColor(sf::Color::White);
-    circle.setOutlineColor(sf::Color::Black);
-    circle.setPosition(100, 100);
-
     int i = 0;
 
     // Game loop
     while(window.isOpen()) {
         sf::Event event;
-        while(window.pollEvent(event)) {
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-
-            // Key Pressing
-            if(event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::W)
-
-
-            // Key Releasing
-            if(event.type == sf::Event::KeyReleased and event.key.code == sf::Keyboard::W)
-                character.change_texture("still_up");
-            if(event.type == sf::Event::KeyReleased and event.key.code == sf::Keyboard::S)
-                character.change_texture("still_down");
-            if(event.type == sf::Event::KeyReleased and event.key.code == sf::Keyboard::A)
-                character.change_texture("still_left");
-            if(event.type == sf::Event::KeyReleased and event.key.code == sf::Keyboard::D)
-                character.change_texture("still_right");
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            character.move(0.f, -character.speed);
-            background.move(0.f, character.speed);
-            if(not background.y_locked)
-                for(auto& skeleton: skeletons)
-                    skeleton.move(0.f, character.speed);
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
 
-            if(elapsed_time.getElapsedTime().asSeconds() >= Character::sprite_time) {
-                character.change_texture((i % 2 == 0)? "walking_up_1": "walking_up_2");
-                i = (i + 1) % 2;
-                elapsed_time.restart();
+                for (auto &circle: graph.vertices) {
+                    if (circle.getGlobalBounds().contains(mousePosition.x, mousePosition.y)) {
+                        character.moving_to = {circle.getPosition().x, circle.getPosition().y};
+                        break;
+                    }
+                }
             }
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            character.move(0.f, character.speed);
-            background.move(0.f, -character.speed);
-            if(not background.y_locked)
-                for(auto& skeleton: skeletons)
-                    skeleton.move(0.f, -character.speed);
 
-            if(elapsed_time.getElapsedTime().asSeconds() >= Character::sprite_time) {
-                character.change_texture((i % 2 == 0)? "walking_down_1": "walking_down_2");
-                i = (i + 1) % 2;
-                elapsed_time.restart();
+        sf::Vector2f direction = character.moving_to - character.position();
+        std::cout << sqrt(direction.x * direction.x + direction.y * direction.y) << "\n";
+        if(sqrt(direction.x * direction.x + direction.y * direction.y) > 15) {
+            character.move_to(character.moving_to.x + 8, character.moving_to.y - 10);
+            sf::Vector2f dist_vector = character.moving_to - character.position();
+            float distance = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y);
+            sf::Vector2f unit_vector = {dist_vector.x / distance, dist_vector.y / distance};
+            sf::Vector2f displacement = {character.speed * unit_vector.x, character.speed * unit_vector.y};
+            background.move(-displacement.x, -displacement.y);
+
+            for (auto &skeleton: skeletons) {
+                if (not background.x_locked)
+                    skeleton.move(-displacement.x, 0);
+                if (not background.y_locked)
+                    skeleton.move(0, -displacement.y);
             }
-//            character.add_health(-1);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-            character.move(-character.speed, 0.f);
-            background.move(character.speed, 0.f);
+            for (auto &circle: graph.vertices) {
+                if (not background.x_locked)
+                    circle.move(-displacement.x, 0);
+                if (not background.y_locked)
+                    circle.move(0, -displacement.y);
+            }
             if(not background.x_locked)
-                for(auto& skeleton: skeletons)
-                    skeleton.move(character.speed, 0.f);
+                character.moving_to += sf::Vector2f{-displacement.x, 0};
+            if(not background.y_locked)
+                character.moving_to += sf::Vector2f{0, -displacement.y};
 
-            if(elapsed_time.getElapsedTime().asSeconds() >= Character::sprite_time) {
-                character.change_texture((i % 2 == 0)? "walking_left_1": "walking_left_2");
+            if (direction.y > 0) {
+                if (elapsed_time.getElapsedTime().asSeconds() >= Character::sprite_time) {
+                    character.change_texture((i % 2 == 0) ? "walking_down_1" : "walking_down_2");
+                    i = (i + 1) % 2;
+                    elapsed_time.restart();
+                }
+            } else if (elapsed_time.getElapsedTime().asSeconds() >= Character::sprite_time) {
+                character.change_texture((i % 2 == 0) ? "walking_up_1" : "walking_up_2");
                 i = (i + 1) % 2;
                 elapsed_time.restart();
             }
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-            character.move(character.speed, 0.f);
-            background.move(-character.speed, 0.f);
-            if(not background.x_locked)
-                for(auto& skeleton: skeletons)
-                    skeleton.move(-character.speed, 0.f);
-
-            if(elapsed_time.getElapsedTime().asSeconds() >= Character::sprite_time) {
-                character.change_texture((i % 2 == 0)? "walking_right_1": "walking_right_2");
-                i = (i + 1) % 2;
-                elapsed_time.restart();
-            }
-        }
-
+        else character.change_texture("still_down");
 
         if(character.position().x - background.position().x < window.getSize().x / 2.0) {
             character.x_locked = false;
@@ -140,13 +121,12 @@ void Game::loop() {
 
         for(auto& skeleton: skeletons) {
             sf::Vector2f dist_vector = character.position() - skeleton.position();
-            double distance = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y);
+            float distance = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y);
             if (distance < 40)
                 character.add_health(-1);
-            sf::Vector2f unit_vector;
-            unit_vector.x = dist_vector.x / distance;
-            unit_vector.y = dist_vector.y / distance;
-            skeleton.move(skeleton.speed * unit_vector.x, skeleton.speed * unit_vector.y);
+            skeleton.move_to(character.position().x, character.position().y);
+            skeleton.health_bar[0].setPosition(skeleton.position() + sf::Vector2f(0, -15));
+            skeleton.health_bar[1].setPosition(skeleton.health_bar[0].getPosition() + sf::Vector2f(skeleton.health_bar[0].getSize().x, 0));
             if (skeleton.position().y > character.position().y) {
                 if ((int) (elapsed_time.getElapsedTime().asSeconds() / Character::sprite_time) % 2 == 0)
                     skeleton.change_texture((i % 2 == 0) ? "skel_walking_up_1" : "skel_walking_up_2");
@@ -158,10 +138,14 @@ void Game::loop() {
         window.clear();
 
         window.draw(background.sprite);
-        window.draw(circle);
+        for(auto& circle: graph.vertices)
+            window.draw(circle);
         window.draw(character.sprite);
-        for(auto& skeleton: skeletons)
+        for(auto& skeleton: skeletons) {
             window.draw(skeleton.sprite);
+            window.draw(skeleton.health_bar[0]);
+            window.draw(skeleton.health_bar[1]);
+        }
         window.draw(character.health_bar[0]);
         window.draw(character.health_bar[1]);
         window.draw(character.text);

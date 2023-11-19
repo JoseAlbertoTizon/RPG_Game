@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cmath>
 
 class Game {
 public:
@@ -17,6 +18,7 @@ public:
         explicit Object(const std::string&, const std::string&);
         void change_texture(const std::string&);
         void move(float, float);
+        void move_to(float, float);
         sf::Vector2f size();
         sf::Vector2f position();
 
@@ -35,6 +37,7 @@ public:
         int health = 200, max_health = 200;
         std::vector<sf::RectangleShape> health_bar;
         void add_health(int);
+        sf::Vector2f moving_to = {100+8, 100-10};
     };
 
     class Enemy : public Object {
@@ -53,6 +56,14 @@ public:
     class Background : public Object {
     public:
         Background(const std::string&, const std::string&);
+    };
+
+    class Graph {
+    public:
+        Graph();
+        std::vector<std::vector<bool>> edges {20, std::vector<bool>(20, false)};
+        std::vector<sf::CircleShape> vertices {20};
+        void add_edge(int, int);
     };
 
 };
