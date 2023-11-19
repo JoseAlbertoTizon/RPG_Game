@@ -29,8 +29,20 @@ public:
 
     class Character : public Object {
     public:
+        sf::Font font;
+        sf::Text text;
         Character(const std::string&, const std::string&);
-        float health = 200, max_health = 200;
+        int health = 200, max_health = 200;
+        std::vector<sf::RectangleShape> health_bar;
+        void add_health(int);
+    };
+
+    class Enemy : public Object {
+    public:
+        Enemy(const std::string&, const std::string&);
+        int health = 200, max_health = 200;
+        std::vector<sf::RectangleShape> health_bar;
+        void add_health(int);
     };
 
     class Obstacle : public Object {

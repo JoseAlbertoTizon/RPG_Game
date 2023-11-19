@@ -17,12 +17,37 @@ Game::Object::Object(const std::string& texture_folder, const std::string& defau
 Game::Character::Character(const std::string& texture_folder, const std::string& default_texture)
     : Object(texture_folder, default_texture) {
     // Set initial values
+    font.loadFromFile("ARIAL.ttf");
     speed = 2;
     hitbox.x = 40;
     hitbox.y = 60;
     x_locked = false;
     y_locked = false;
+    health_bar.push_back(sf::RectangleShape(sf::Vector2f(200, 20)));
+    health_bar.push_back(sf::RectangleShape(sf::Vector2f(0, 20)));
+    health_bar[0].setOutlineColor(sf::Color::Black);
+    health_bar[1].setOutlineColor(sf::Color::Black);
+    health_bar[0].setFillColor(sf::Color::Red);
+    health_bar[1].setFillColor(sf::Color::Black);
+    health_bar[0].setOutlineThickness(3);
+    health_bar[1].setOutlineThickness(3);
+    health_bar[0].setPosition(420, 20);
+    health_bar[1].setPosition(620, 20);
+    text = sf::Text{"200/200", font};
+    text.setFillColor(sf::Color::White);
+    text.setPosition(490, 20);
+    text.setCharacterSize(15);
 };
+
+Game::Enemy::Enemy(const std::string& texture_folder, const std::string& default_texture)
+        : Object(texture_folder, default_texture) {
+    // Set initial values
+    speed = 1;
+    hitbox.x = 40;
+    hitbox.y = 60;
+    x_locked = false;
+    y_locked = false;
+}
 
 Game::Obstacle::Obstacle(const std::string& texture_folder, const std::string& default_texture)
         : Object(texture_folder, default_texture) {
@@ -55,4 +80,17 @@ sf::Vector2f Game::Object::position() {
 
 sf::Vector2f Game::Object::size() {
     return sprite.getGlobalBounds().getSize();
+}
+
+void Game::Character::add_health(int dif) {
+    if(health + dif >= max_health) {
+        health = max_health;
+        return;
+    }
+    health += dif;
+    health_bar[0].setSize(sf::Vector2f(200*health/max_health, 20));
+    health_bar[1].setSize(sf::Vector2f(200*(max_health-health)/max_health, 20));
+    health_bar[0].setPosition(420, 20);
+    health_bar[1].setPosition(420 + health_bar[0].getSize().x, 20);
+    text.setString(std::to_string(health) + "/" + std::to_string(max_health));
 }
