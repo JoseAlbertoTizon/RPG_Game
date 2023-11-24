@@ -15,7 +15,7 @@ public:
 
     class Object {
     public:
-        explicit Object(const std::string&, const std::string&);
+        explicit Object(const std::string&);
         void change_texture(const std::string&);
         void move(float, float);
         void move_to(float, float);
@@ -23,26 +23,37 @@ public:
         sf::Vector2f position();
 
         sf::Sprite sprite;
-        sf::Vector2f hitbox;
         float speed;
         bool x_locked, y_locked;
-        constexpr static const float sprite_time = 0.15;
     };
 
     class Character : public Object {
     public:
+        Character(const std::string&);
+
         sf::Font font;
-        sf::Text text;
-        Character(const std::string&, const std::string&);
-        int health = 200, max_health = 200;
+        sf::Text text, coin_text;
+
+        std::vector<Object> projectiles;
+        Object coin{"coin"};
+        int coins;
+        void add_coins(int);
+
         std::vector<sf::RectangleShape> health_bar;
+        Object heart{"heart"};
+        int health = 200, max_health = 200;
         void add_health(int);
-        sf::Vector2f moving_to = {100+8, 100-10};
+
+        int from_circle = 0;
+        int to_circle;
+        bool is_moving = false;
+        std::vector<int> path{};
     };
 
     class Enemy : public Object {
     public:
-        Enemy(const std::string&, const std::string&);
+        Enemy(const std::string&);
+
         int health = 200, max_health = 200;
         std::vector<sf::RectangleShape> health_bar;
         void add_health(int);
@@ -50,21 +61,29 @@ public:
 
     class Obstacle : public Object {
     public:
-        Obstacle(const std::string&, const std::string&);
+        Obstacle(const std::string&);
     };
 
     class Background : public Object {
     public:
-        Background(const std::string&, const std::string&);
+        Background(const std::string&);
     };
 
     class Graph {
     public:
         Graph();
-        std::vector<std::vector<bool>> edges {20, std::vector<bool>(20, false)};
-        std::vector<sf::CircleShape> vertices {20};
+        bool edges[12][12];
+        float weights[12][12];
+        std::vector<int> prices{0, 1, 2, 5, 7, 9, 10, 20, 22, 24, 26, 30};
+        std::vector<sf::CircleShape> vertices {12};
+        std::vector<sf::VertexArray> lines;
         void add_edge(int, int);
+        std::vector<int> find_minimum_path(int, int);
     };
 
 };
+
+float abs(sf::Vector2f);
+void load_all_textures();
+
 
