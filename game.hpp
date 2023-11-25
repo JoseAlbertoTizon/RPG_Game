@@ -24,7 +24,6 @@ public:
 
         sf::Sprite sprite;
         float speed;
-        bool x_locked, y_locked;
     };
 
     class Character : public Object {

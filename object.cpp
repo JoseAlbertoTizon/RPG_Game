@@ -14,8 +14,6 @@ Game::Character::Character(const std::string& default_texture)
     // Set initial values
     font.loadFromFile("ARIAL.ttf");
     speed = 2;
-    x_locked = false;
-    y_locked = false;
 
     coin.sprite.setScale(0.04, 0.04);
     coin.sprite.setPosition(389.7, 53);
@@ -48,8 +46,6 @@ Game::Enemy::Enemy(const std::string& default_texture)
         : Object(default_texture) {
     // Set initial values
     speed = 1;
-    x_locked = false;
-    y_locked = false;
     health_bar.push_back(sf::RectangleShape(sf::Vector2f(30, 10)));
     health_bar.push_back(sf::RectangleShape(sf::Vector2f(0, 10)));
     health_bar[0].setOutlineColor(sf::Color::Black);
@@ -66,15 +62,11 @@ Game::Enemy::Enemy(const std::string& default_texture)
 Game::Obstacle::Obstacle(const std::string& default_texture)
         : Object(default_texture) {
     // Set initial values
-    x_locked = true;
-    y_locked = true;
 };
 
 Game::Background::Background(const std::string& default_texture)
         : Object(default_texture) {
     // Set initial values
-    x_locked = true;
-    y_locked = true;
 };
 
 void Game::Object::change_texture(const std::string& texture_name) {
@@ -82,10 +74,7 @@ void Game::Object::change_texture(const std::string& texture_name) {
 }
 
 void Game::Object::move(float delta_x, float delta_y) {
-    if(not x_locked)
-        sprite.setPosition(position().x + delta_x, position().y);
-    if(not y_locked)
-        sprite.setPosition(position().x, position().y + delta_y);
+    sprite.setPosition(position() + sf::Vector2f(delta_x, delta_y));
 }
 
 void Game::Object::move_to(float x, float y) {
@@ -93,10 +82,7 @@ void Game::Object::move_to(float x, float y) {
     float distance = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y);
     sf::Vector2f unit_vector = {dist_vector.x / distance, dist_vector.y / distance};
     sf::Vector2f displacement = {this->speed * unit_vector.x, this->speed * unit_vector.y};
-    if(not x_locked)
-        this->move(displacement.x, 0);
-    if(not y_locked)
-        this->move(0, displacement.y);
+    this->move(displacement.x, displacement.y);
 }
 
 sf::Vector2f Game::Object::position() {

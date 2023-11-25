@@ -95,44 +95,6 @@ void Game::loop() {
 
             if (abs(direction) > 15) {
                 character.move_to(to_position.x + 8, to_position.y - 10);
-                float distance = abs(direction);
-                sf::Vector2f unit_vector = {direction.x / distance, direction.y / distance};
-                sf::Vector2f displacement = {character.speed * unit_vector.x, character.speed * unit_vector.y};
-                background.move(-displacement.x, -displacement.y);
-
-                for (auto &skeleton: skeletons) {
-                    if (not background.x_locked)
-                        skeleton.move(-displacement.x, 0);
-                    if (not background.y_locked)
-                        skeleton.move(0, -displacement.y);
-                }
-                for (auto &circle: graph.vertices) {
-                    if (not background.x_locked)
-                        circle.move(-displacement.x, 0);
-                    if (not background.y_locked)
-                        circle.move(0, -displacement.y);
-                }
-                for(auto& line: graph.lines) {
-                    if (not background.x_locked) {
-                        line[0].position = line[0].position + sf::Vector2f(-displacement.x, 0);
-                        line[1].position = line[1].position + sf::Vector2f(-displacement.x, 0);
-                        line[2].position = line[2].position + sf::Vector2f(-displacement.x, 0);
-                        line[3].position = line[3].position + sf::Vector2f(-displacement.x, 0);
-
-                    }
-                    if (not background.y_locked) {
-                        line[0].position = line[0].position + sf::Vector2f(0, -displacement.y);
-                        line[1].position = line[1].position + sf::Vector2f(0, -displacement.y);
-                        line[2].position = line[2].position + sf::Vector2f(0, -displacement.y);
-                        line[3].position = line[3].position + sf::Vector2f(0, -displacement.y);
-                    }
-                }
-
-                if (not background.x_locked)
-                    to_position += sf::Vector2f{-displacement.x, 0};
-                if (not background.y_locked)
-                    to_position += sf::Vector2f{0, -displacement.y};
-
                 if (direction.y > 0) {
                     if (elapsed_time.getElapsedTime().asSeconds() >= 0.15) {
                         character.change_texture((i % 2 == 0) ? "walking_down_1" : "walking_down_2");
@@ -156,35 +118,6 @@ void Game::loop() {
                     character.change_texture("still_down");
                 }
             }
-        }
-
-        if(character.position().x - background.position().x < window.getSize().x / 2.0) {
-            character.x_locked = false;
-            background.x_locked = true;
-            background.sprite.setPosition(0, background.position().y);
-        }
-        else if(background.position().x + background.size().x - character.position().x < window.getSize().x / 2.0) {
-            character.x_locked = false;
-            background.x_locked = true;
-            background.sprite.setPosition((float)window.getSize().x - background.size().x, background.position().y);
-        }
-        else {
-            character.x_locked = true;
-            background.x_locked = false;
-        }
-        if(character.position().y - background.position().y < window.getSize().y / 2.0) {
-            character.y_locked = false;
-            background.y_locked = true;
-            background.sprite.setPosition(background.position().x, 0);
-        }
-        else if(background.position().y + background.size().y - character.position().y < window.getSize().y / 2.0) {
-            character.y_locked = false;
-            background.y_locked = true;
-            background.sprite.setPosition(background.position().x, (float)window.getSize().y - background.size().y);
-        }
-        else {
-            character.y_locked = true;
-            background.y_locked = false;
         }
 
         for(auto& skeleton: skeletons) {
