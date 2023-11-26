@@ -9,6 +9,8 @@ Game::Object::Object(const std::string& default_texture) {
     change_texture(default_texture);
 }
 
+Game::Object::Object() = default;
+
 Game::Character::Character(const std::string& default_texture)
     : Object(default_texture) {
     // Set initial values
@@ -40,6 +42,7 @@ Game::Character::Character(const std::string& default_texture)
     text.setFillColor(sf::Color::White);
     text.setPosition(490, 20);
     text.setCharacterSize(15);
+
 };
 
 Game::Enemy::Enemy(const std::string& default_texture)
@@ -59,11 +62,6 @@ Game::Enemy::Enemy(const std::string& default_texture)
 
 }
 
-Game::Obstacle::Obstacle(const std::string& default_texture)
-        : Object(default_texture) {
-    // Set initial values
-};
-
 Game::Background::Background(const std::string& default_texture)
         : Object(default_texture) {
     // Set initial values
@@ -79,7 +77,11 @@ void Game::Object::move(float delta_x, float delta_y) {
 
 void Game::Object::move_to(float x, float y) {
     sf::Vector2f dist_vector = sf::Vector2f{x, y} - this->position();
-    float distance = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y);
+    move_to_direction(dist_vector);
+}
+
+void Game::Object::move_to_direction(sf::Vector2f dist_vector) {
+    float distance = abs(dist_vector);
     sf::Vector2f unit_vector = {dist_vector.x / distance, dist_vector.y / distance};
     sf::Vector2f displacement = {this->speed * unit_vector.x, this->speed * unit_vector.y};
     this->move(displacement.x, displacement.y);
@@ -101,10 +103,6 @@ void Game::Character::add_coins(int dif) {
 void Game::Character::add_health(int dif) {
     if(health + dif >= max_health) {
         health = max_health;
-        return;
-    }
-    if(health + dif <= 0) {
-        health = 0;
         return;
     }
 
@@ -130,19 +128,19 @@ Game::Graph::Graph() {
     for(auto& circle: vertices) {
         circle.setFillColor(sf::Color::Red);
         circle.setOutlineColor(sf::Color::Black);
-        circle.setRadius(30);
+        circle.setRadius(15);
     }
 
     vertices[0].setPosition(100, 100);
-    vertices[1].setPosition(300, 300);
-    vertices[2].setPosition(600, 600);
-    vertices[3].setPosition(600, 300);
-    vertices[4].setPosition(100, 100);
-    vertices[5].setPosition(100, 100);
-    vertices[6].setPosition(100, 100);
-    vertices[7].setPosition(100, 100);
-    vertices[8].setPosition(100, 100);
-    vertices[9].setPosition(100, 100);
+    vertices[1].setPosition(200, 200);
+    vertices[2].setPosition(200, 300);
+    vertices[3].setPosition(100, 400);
+    vertices[4].setPosition(100, 500);
+    vertices[5].setPosition(200, 500);
+    vertices[6].setPosition(300, 500);
+    vertices[7].setPosition(400, 400);
+    vertices[8].setPosition(500, 300);
+    vertices[9].setPosition(500, 400);
     vertices[10].setPosition(100, 100);
     vertices[11].setPosition(100, 100);
     vertices[12].setPosition(100, 100);
@@ -165,10 +163,10 @@ void Game::Graph::add_edge(int from, int to) {
     sf::Vector2f direction = line[0].position - line[1].position;
     sf::Vector2f unit_normal_direction = {-direction.y / abs(direction), direction.x / abs(direction)};
 
-    line[0].position = line[0].position - sf::Vector2f(unit_normal_direction.x*2.5, unit_normal_direction.y*2.5);
-    line[1].position = line[1].position - sf::Vector2f(unit_normal_direction.x*2.5, unit_normal_direction.y*2.5);
-    line[2].position = line[0].position + sf::Vector2f(unit_normal_direction.x*2.5, unit_normal_direction.y*2.5);
-    line[3].position = line[1].position + sf::Vector2f(unit_normal_direction.x*2.5, unit_normal_direction.y*2.5);
+    line[0].position = line[0].position - sf::Vector2f(unit_normal_direction.x*1, unit_normal_direction.y*1);
+    line[1].position = line[1].position - sf::Vector2f(unit_normal_direction.x*1, unit_normal_direction.y*1);
+    line[2].position = line[0].position + sf::Vector2f(unit_normal_direction.x*1, unit_normal_direction.y*1);
+    line[3].position = line[1].position + sf::Vector2f(unit_normal_direction.x*1, unit_normal_direction.y*1);
     line[2].color = sf::Color::Red;
     line[3].color = sf::Color::Red;
 

@@ -10,17 +10,22 @@ public:
     void loop();
 
 //private:
-    sf::RenderWindow window{sf::VideoMode(640, 640), "RPG"};
+    sf::RenderWindow window{sf::VideoMode(670, 670), "RPG"};
     static std::map<std::string, sf::Texture> textures;
+
+    bool released_left = false;
 
     class Object {
     public:
         explicit Object(const std::string&);
+        Object();
         void change_texture(const std::string&);
         void move(float, float);
         void move_to(float, float);
+        void move_to_direction(sf::Vector2f);
         sf::Vector2f size();
         sf::Vector2f position();
+        sf::Vector2f destination_direction;
 
         sf::Sprite sprite;
         float speed;
@@ -56,11 +61,6 @@ public:
         int health = 200, max_health = 200;
         std::vector<sf::RectangleShape> health_bar;
         void add_health(int);
-    };
-
-    class Obstacle : public Object {
-    public:
-        Obstacle(const std::string&);
     };
 
     class Background : public Object {

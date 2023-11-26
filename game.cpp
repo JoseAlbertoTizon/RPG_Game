@@ -26,20 +26,15 @@ void Game::loop() {
     sf::Clock mob_elapsed_time;
 
     // Create background
-    Background background("background_rpg_2");
+    Background background("level_1");
 
     // Create graph for movement
     Graph graph;
-    graph.add_edge(0, 1);
-    graph.add_edge(1, 0);
-
-//    std::vector<int> path = graph.find_minimum_path(0, 1);
-//    for(int x: path)
-//        std:: cout << x << "\n";
 
     // Create main character
     Character character("still_down");
     character.sprite.setPosition(100+8, 100-10);
+    character.sprite.setScale(0.75, 0.75);
 
     // Create skeleton vector
     std::vector<Enemy> skeletons;
@@ -47,8 +42,9 @@ void Game::loop() {
     skeletons.push_back(Enemy{"skel_still_down"});
     skeletons[0].sprite.setPosition(100, 100);
     skeletons[1].sprite.setPosition(400, 200);
-    for (auto &skeleton: skeletons)
-        skeleton.sprite.setScale(1.5, 1.5);
+
+    // Create projectiles vector;
+    std::vector<Object> projectiles;
 
     int i = 0, j = 0;
 
@@ -66,15 +62,20 @@ void Game::loop() {
                 for (int k = 0; k < graph.vertices.size(); ++ k) {
                     if (graph.vertices[k].getGlobalBounds().contains(mousePosition.x, mousePosition.y) and not character.is_moving) {
                         character.path = graph.find_minimum_path(character.from_circle, k);
-                        for(auto x: character.path)
-                            std::cout << x << "\n";
-                        if(character.path.empty())
-                            std::cout << "no path available\n";
                         if(not character.path.empty() and *(character.path.end()) != character.from_circle) {
                             character.is_moving = true;
                             character.to_circle = character.path[1];
                         }
                         break;
+                    }
+                    else if(released_left){
+                        Object projectile("bullet");
+                        projectile.sprite.setPosition(character.position());
+                        projectile.sprite.setScale(0.02, 0.02);
+                        projectile.destination_direction = (sf::Vector2f)mousePosition - projectile.position();
+                        projectile.speed = 10;
+                        projectiles.push_back(projectile);
+                        released_left = false;
                     }
                 }
             }
@@ -87,6 +88,10 @@ void Game::loop() {
                     }
                 }
             }
+        }
+        if(event.type == sf::Event::MouseButtonReleased) {
+            if(event.mouseButton.button == sf::Mouse::Left)
+                released_left = true;
         }
 
         if(character.is_moving) {
@@ -120,11 +125,17 @@ void Game::loop() {
             }
         }
 
-        for(auto& skeleton: skeletons) {
+        for(int k = 0; k < skeletons.size(); ++ k) {
+            auto& skeleton = skeletons[k];
             sf::Vector2f dist_vector = character.position() - skeleton.position();
-            float distance = abs(dist_vector);
-            if (distance < 40)
-                character.add_health(1);
+            if (abs(dist_vector) < 40)
+                character.add_health(-1);
+            for(auto& projectile: projectiles) {
+                dist_vector = projectile.position() - skeleton.position();
+                if(abs(dist_vector) < 40)
+                    skeleton.add_health(-5);
+            }
+
             skeleton.move_to(character.position().x, character.position().y);
             skeleton.health_bar[0].setPosition(skeleton.position() + sf::Vector2f(33, 10));
             skeleton.health_bar[1].setPosition(skeleton.health_bar[0].getPosition() + sf::Vector2f(skeleton.health_bar[0].getSize().x, 0));
@@ -134,10 +145,22 @@ void Game::loop() {
             }
             else if (mob_elapsed_time.getElapsedTime().asSeconds() >= 0.15)
                 skeleton.change_texture((j % 2 == 0) ? "skel_walking_down_1" : "skel_walking_down_2");
+
+            if(skeleton.health < 0)
+                skeletons.erase(skeletons.begin() + k);
+
         }
         if (mob_elapsed_time.getElapsedTime().asSeconds() >= 0.15) {
             j = (j + 1) % 2;
             mob_elapsed_time.restart();
+        }
+
+        for(int k = 0; k < projectiles.size(); ++ k) {
+            auto& projectile = projectiles[k];
+            projectile.move_to_direction(projectile.destination_direction);
+            if(fabs(projectile.position().x) > 1000 or fabs(projectile.position().y) > 1000 or
+            projectile.position().x < -100 or projectile.position().y < -100)
+                projectiles.erase(projectiles.begin() + k);
         }
 
 
@@ -153,6 +176,9 @@ void Game::loop() {
             window.draw(skeleton.sprite);
             window.draw(skeleton.health_bar[0]);
             window.draw(skeleton.health_bar[1]);
+        }
+        for(auto& projectile: projectiles) {
+            window.draw(projectile.sprite);
         }
         window.draw(character.coin.sprite);
         window.draw(character.coin_text);
