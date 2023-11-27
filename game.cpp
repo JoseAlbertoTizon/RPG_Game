@@ -62,7 +62,7 @@ void Game::loop() {
                 for (int k = 0; k < graph.vertices.size(); ++ k) {
                     if (graph.vertices[k].getGlobalBounds().contains(mousePosition.x, mousePosition.y) and not character.is_moving) {
                         character.path = graph.find_minimum_path(character.from_circle, k);
-                        if(not character.path.empty() and *(character.path.end()) != character.from_circle) {
+                        if(not character.path.empty() and *(character.path.end() - 1) != character.from_circle) {
                             character.is_moving = true;
                             character.to_circle = character.path[1];
                         }
@@ -146,8 +146,10 @@ void Game::loop() {
             else if (mob_elapsed_time.getElapsedTime().asSeconds() >= 0.15)
                 skeleton.change_texture((j % 2 == 0) ? "skel_walking_down_1" : "skel_walking_down_2");
 
-            if(skeleton.health < 0)
+            if(skeleton.health < 0) {
                 skeletons.erase(skeletons.begin() + k);
+                character.add_coins(10);
+            }
 
         }
         if (mob_elapsed_time.getElapsedTime().asSeconds() >= 0.15) {
