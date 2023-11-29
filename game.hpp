@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SFML/Graphics.hpp>
 #include "object.hpp"
 #include "object.hpp"
@@ -9,11 +11,10 @@ public:
     void loop();
 
 //private:
-    enum GameState{Menu, Running, Dead};
-//    GameState gameState = Menu;
-    GameState gameState = Running;
+    enum GameState{MENU, RUNNING, DEAD};
+    GameState gameState = MENU;
 
-    enum MenuOption{NewGame, Continue, Credits};
+    enum MenuOption{Nothing, NewGame, Continue, Credits};
     MenuOption menuOption;
 
     sf::RenderWindow window{sf::VideoMode(670, 670), "RPG"};

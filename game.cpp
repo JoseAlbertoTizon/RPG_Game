@@ -2,6 +2,7 @@
 #include "object.hpp"
 #include "graph.hpp"
 #include "utility.hpp"
+#include "menu.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -9,6 +10,11 @@ void Game::loop() {
     load_all_textures();
 
     //
+
+    // Create menu
+    Menu menu;
+
+    // Death screen
 
 
     // Create game clocks
@@ -47,7 +53,7 @@ void Game::loop() {
                 window.close();
         }
 
-        if (gameState == Running) {
+        if (gameState == RUNNING) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
@@ -184,7 +190,11 @@ void Game::loop() {
 
             window.display();
         }
-    }
 
-    if(gameState == Dead);
+        if(gameState == MENU) {
+            menuOption = menu.RunMenu(window, event);
+            if(menuOption == NewGame or menuOption == Continue)
+                gameState = RUNNING;
+        }
+    }
 }
