@@ -45,7 +45,7 @@ void Menu::setvalues() {
         texts[i].setOutlineColor(sf::Color::Black);
         texts[i].setPosition(coords[i]);
 
-        texts[1].setOutlineThickness(8);
+        texts[0].setOutlineThickness(8);
 
         winclose->setSize(sf::Vector2f(48,59));
         winclose->setPosition(1200,14);
@@ -88,7 +88,6 @@ Game::MenuOption Menu::search_for_events(sf::RenderWindow& window, sf::Event eve
             return Game::Continue;
         if (pos == 2)
             return Game::Credits;
-
     }
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
         if (winclose->getGlobalBounds().contains(mouse_cord)) {
@@ -97,8 +96,6 @@ Game::MenuOption Menu::search_for_events(sf::RenderWindow& window, sf::Event eve
     }
     return Game::Nothing;
 }
-
-
 
 void Menu::draw_all(sf::RenderWindow& window) {
     window.clear();

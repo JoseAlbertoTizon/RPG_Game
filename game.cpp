@@ -9,18 +9,33 @@
 void Game::loop() {
     load_all_textures();
 
-    //
-
     // Create menu
     Menu menu;
 
     // Death screen
-
+    sf::Font font;
+    font.loadFromFile("SNAP____.TTF");
+    sf::RectangleShape close_button{sf::Vector2f(150, 60)};
+    sf::RectangleShape go_to_save_button{sf::Vector2f(150, 60)};
+    close_button.setPosition(140, 400);
+    go_to_save_button.setPosition(380, 400);
+    sf::Text close_text{"Close", font};
+    close_text.setCharacterSize(25);
+    sf::Text go_to_save_text{"Last Save", font};
+    go_to_save_text.setCharacterSize(25);
+    close_text.setPosition(160, 415);
+    go_to_save_text.setPosition(380, 410);
+    close_text.setFillColor(sf::Color::Black);
+    go_to_save_text.setFillColor(sf::Color::Black);
+    close_text.setOutlineColor(sf::Color::Red);
+    go_to_save_text.setOutlineColor(sf::Color::Red);
 
     // Create game clocks
-    sf::Clock elapsed_time;
-    sf::Clock mob_elapsed_time;
-    sf::Clock spawn_clock;
+    sf::Clock elapsed_time, mob_elapsed_time, spawn_clock;
+    sf::Clock time_after_last_save;
+
+    // Create save file
+    std::fstream save_file;
 
     // Create background
     Background background(textures, "level_1");
@@ -30,15 +45,11 @@ void Game::loop() {
 
     // Create main character
     Character character(textures, "still_down");
-    character.sprite.setPosition(100+8, 100-10);
+    character.sprite.setPosition(graph.vertices[character.from_circle].getPosition() + sf::Vector2f(0, -10));
     character.sprite.setScale(0.75, 0.75);
 
     // Create skeleton vector
     std::vector<Enemy> skeletons;
-//    skeletons.push_back(Enemy{textures, "skel_still_down"});
-//    skeletons.push_back(Enemy{textures, "skel_still_down"});
-//    skeletons[0].sprite.setPosition(100, 100);
-//    skeletons[1].sprite.setPosition(400, 200);
 
     // Create projectiles vector;
     std::vector<Object> projectiles;
@@ -58,9 +69,13 @@ void Game::loop() {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
                     for (int k = 0; k < graph.vertices.size(); ++k) {
-                        if (graph.vertices[k].getGlobalBounds().contains(mousePosition.x, mousePosition.y) and not character.is_moving) {
+                        if (graph.vertices[k].getGlobalBounds().contains(mousePosition.x, mousePosition.y) and
+                            not character.is_moving) {
                             character.path = graph.find_minimum_path(character.from_circle, k);
                             if (not character.path.empty() and *(character.path.end() - 1) != character.from_circle) {
+//                                for(auto x: character.path)
+//                                    std::cout << x << " ";
+//                                std::cout << "\n";
                                 character.is_moving = true;
                                 character.to_circle = character.path[1];
                             }
@@ -83,7 +98,6 @@ void Game::loop() {
                             if (not graph.edges[character.from_circle][k] and character.coins >= graph.prices[k]) {
                                 character.add_coins(-graph.prices[k]);
                                 graph.add_edge(character.from_circle, k);
-                                graph.add_edge(k, character.from_circle);
                                 if (difficulty < 10)
                                     difficulty += 0.5;
 
@@ -100,6 +114,52 @@ void Game::loop() {
             if (event.type == sf::Event::MouseButtonReleased) {
                 if (event.mouseButton.button == sf::Mouse::Right)
                     released_right = true;
+            }
+
+            if (character.health < 0)
+                gameState = DEAD;
+
+            if(event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Up and gameState != DEAD) {
+                save_file.close();
+                save_file.open("save_data.txt", std::fstream::out | std::fstream::trunc);
+                character.save_state_to_file(save_file);
+                save_file << "number_of_enemies: " << skeletons.size() << "\n";
+                for(auto& skeleton: skeletons)
+                    skeleton.save_state_to_file(save_file);
+                graph.save_to_file(save_file);
+                save_file << "game_difficulty: " << difficulty << "\n";
+            }
+
+            if(is_loading) {
+                character.from_circle = (int)save_data_map["character_standing_circle: "];
+                character.sprite.setPosition(graph.vertices[character.from_circle].getPosition() + sf::Vector2f(0, -10));
+                character.health = (int)save_data_map["character_health: "];
+                character.add_health(0);
+                character.coins = (int)save_data_map["character_coins: "];
+                character.add_coins(0);
+                while(not skeletons.empty())
+                    skeletons.pop_back();
+                for(int k = 0; k < (int)save_data_map["number_of_enemies: "]; ++ k) {
+                    Enemy skeleton(textures, "skel_still_down");
+                    skeleton.sprite.setPosition(save_data_map["enemy_" + std::to_string(k) + "_position.x: "], save_data_map["enemy_" + std::to_string(k) + "_position.y: "]);
+                    skeleton.health = (int)save_data_map["enemy_" + std::to_string(k) + "_health: "];
+                    skeleton.add_health(0);
+                    skeletons.push_back(skeleton);
+                }
+                for(int i = 0; i < 12; ++ i)
+                    for(int j = 0; j < 12; ++ j) {
+                        if ((int) save_data_map[std::to_string(i) + ", " + std::to_string(j) + ": "] == 1)
+                            graph.add_edge(i, j);
+                    }
+                for(int i = 0; i < 12; ++ i) {
+                    graph.prices[i] = (int)save_data_map["price_vertex_" + std::to_string(i) + ": "];
+                    graph.price_texts[i].setString(std::to_string(graph.prices[i]));
+                }
+
+
+                difficulty = save_data_map["game_difficulty: "];
+
+                is_loading = false;
             }
 
             if (character.is_moving) {
@@ -120,6 +180,7 @@ void Game::loop() {
                         elapsed_time.restart();
                     }
                 } else {
+                    character.sprite.setPosition(graph.vertices[character.to_circle].getPosition() + sf::Vector2f(0, -10));
                     character.path.erase(character.path.begin());
                     character.from_circle = character.path[0];
                     if (not character.path.empty())
@@ -144,8 +205,7 @@ void Game::loop() {
 
                 skeleton.move_to(character.position().x, character.position().y);
                 skeleton.health_bar[0].setPosition(skeleton.position() + sf::Vector2f(18, 16));
-                skeleton.health_bar[1].setPosition(
-                        skeleton.health_bar[0].getPosition() + sf::Vector2f(skeleton.health_bar[0].getSize().x, 0));
+                skeleton.health_bar[1].setPosition(skeleton.health_bar[0].getPosition() + sf::Vector2f(skeleton.health_bar[0].getSize().x, 0));
                 if (skeleton.position().y > character.position().y) {
                     if (mob_elapsed_time.getElapsedTime().asSeconds() >= 0.15)
                         skeleton.change_texture(textures, (j % 2 == 0) ? "skel_walking_up_1" : "skel_walking_up_2");
@@ -191,10 +251,39 @@ void Game::loop() {
             window.display();
         }
 
-        if(gameState == MENU) {
+        if (gameState == MENU) {
             menuOption = menu.RunMenu(window, event);
-            if(menuOption == NewGame or menuOption == Continue)
+            if (menuOption == NewGame) {
                 gameState = RUNNING;
+                is_loading = false;
+            }
+            if(menuOption == Continue) {
+                gameState = RUNNING;
+                load("save_data.txt");
+            }
+        }
+
+        if (gameState == DEAD) {
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                    if (close_button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                        window.close();
+                    if(go_to_save_button.getGlobalBounds().contains(mousePosition.x, mousePosition.y)) {
+                        gameState = RUNNING;
+                        load("save_data.txt");
+                    }
+                }
+            }
+
+            window.clear();
+
+            window.draw(close_button);
+            window.draw(go_to_save_button);
+            window.draw(close_text);
+            window.draw(go_to_save_text);
+
+            window.display();
         }
     }
 }

@@ -6,15 +6,17 @@
 
 class Game {
 public:
+    enum GameState{MENU, PAUSE, RUNNING, DEAD};
+
+    enum MenuOption{Nothing, NewGame, Continue, Credits};
+
     Game();
 
     void loop();
 
-//private:
-    enum GameState{MENU, RUNNING, DEAD};
+private:
     GameState gameState = MENU;
 
-    enum MenuOption{Nothing, NewGame, Continue, Credits};
     MenuOption menuOption;
 
     sf::RenderWindow window{sf::VideoMode(670, 670), "RPG"};
@@ -28,8 +30,10 @@ public:
     float difficulty = 0;
     void spawn_enemy(std::vector<Enemy>&);
 
-    std::map<std::string, float> save_data;
-    void load_save_file(const std::string&);
+    std::map<std::string, float> save_data_map;
+
+    bool is_loading = false;
+    void load(const std::string&);
 };
 
 

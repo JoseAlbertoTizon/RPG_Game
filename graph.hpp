@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "object.hpp"
+#include <fstream>
 
 class Graph {
 public:
@@ -22,4 +22,6 @@ public:
     std::vector<int> find_minimum_path(int, int);
 
     void render(sf::RenderWindow& window);
+
+    void save_to_file(std::fstream&);
 };

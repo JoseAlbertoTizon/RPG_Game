@@ -141,3 +141,16 @@ void Background::render(sf::RenderWindow& window) {
     window.draw(sprite);
 }
 
+void Character::save_state_to_file(std::fstream& save_file) {
+    save_file << "character_standing_circle: " << from_circle << "\n";
+    save_file << "character_health: " << health << "\n";
+    save_file << "character_coins: " << coins << "\n";
+}
+
+void Enemy::save_state_to_file(std::fstream& save_file) {
+    save_file << "enemy_position.x: " << position().x << "\n";
+    save_file << "enemy_position.y: " << position().y << "\n";
+    save_file << "enemy_health: " << health << "\n";
+}
+
+

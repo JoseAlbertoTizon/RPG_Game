@@ -3,6 +3,7 @@
 #include "utility.hpp"
 #include <set>
 #include <limits>
+#include <iostream>
 
 Graph::Graph() {
     for(auto& circle: vertices) {
@@ -43,6 +44,7 @@ Graph::Graph() {
 
 void Graph::add_edge(int from, int to) {
     edges[from][to] = true;
+    edges[to][from] = true;
     sf::VertexArray line(sf::TriangleStrip, 4);
     line[0].position = vertices[from].getPosition() + sf::Vector2f(15, 15);
     line[1].position = vertices[to].getPosition() + sf::Vector2f(15, 15);;
@@ -113,4 +115,14 @@ void Graph::render(sf::RenderWindow& window) {
         window.draw(circle);
     for(auto& price_text: price_texts)
         window.draw(price_text);
+}
+
+void Graph::save_to_file(std::fstream& save_file) {
+    for(int i = 0; i < 12; ++ i)
+        for(int j = 0; j < 12; ++ j)
+            if(edges[i][j])
+                save_file << 1 << "\n";
+            else save_file << 0 << "\n";
+    for(int i = 0; i < 12; ++ i)
+        save_file << prices[i] << "\n";
 }

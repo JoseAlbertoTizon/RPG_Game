@@ -1,8 +1,7 @@
 #include "game.hpp"
 #include "utility.hpp"
 #include <filesystem>
-#include <fstream>
-#include <cctype>
+#include <iostream>
 
 Game::Game() {
     window.setFramerateLimit(60);
@@ -45,14 +44,31 @@ void Game::spawn_enemy(std::vector<Enemy>& enemies) {
     }
 }
 
-//void Game::load_save_file(const std::string& save_file) {
-//    std::ifstream save;
-//    save.open(save_file);
-//
-//    char aux;
-//    float value;
-//    while(save >> aux) {
-//        if(save.peek())
-//    }
-//}
+void Game::load(const std::string& save_data) {
+    is_loading = true;
+    std::fstream save_file;
+    save_file.open(save_data);
+    save_data_map["character_standing_circle: "] = read_value_from_line(save_file);
+    save_data_map["character_health: "] = read_value_from_line(save_file);
+    save_data_map["character_coins: "] = read_value_from_line(save_file);
+    save_data_map["number_of_enemies: "] = read_value_from_line(save_file);
+    for(int i = 0; i < (int)save_data_map["number_of_enemies: "]; ++ i) {
+        save_data_map["enemy_" + std::to_string(i) + "_position.x: "] = read_value_from_line(save_file);
+        save_data_map["enemy_" + std::to_string(i) + "_position.y: "] = read_value_from_line(save_file);
+        save_data_map["enemy_" + std::to_string(i) + "_health: "] = read_value_from_line(save_file);
+    }
+    bool edge_exists;
+    for(int i = 0; i < 12; ++ i)
+        for(int j = 0; j < 12; ++ j) {
+        save_file >> edge_exists;
+        save_data_map[std::to_string(i) + ", " + std::to_string(j) + ": "] = edge_exists;
+    }
+    int price;
+    for(int i = 0; i < 12; ++ i) {
+        save_file >> price;
+        save_data_map["price_vertex_" + std::to_string(i) + ": "] = price;
+    }
+    save_data_map["difficulty: "] = read_value_from_line(save_file);
+}
+
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <fstream>
 
 class Object {
 public:
@@ -46,6 +47,8 @@ public:
     std::vector<int> path{};
 
     void render(sf::RenderWindow& window);
+
+    void save_state_to_file(std::fstream&);
 };
 
 class Enemy : public Object {
@@ -57,6 +60,8 @@ public:
     void add_health(int);
 
     void render(sf::RenderWindow& window);
+
+    void save_state_to_file(std::fstream&);
 };
 
 class Background : public Object {
