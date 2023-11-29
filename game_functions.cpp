@@ -1,6 +1,8 @@
 #include "game.hpp"
 #include "utility.hpp"
 #include <filesystem>
+#include <fstream>
+#include <cctype>
 
 Game::Game() {
     window.setFramerateLimit(60);
@@ -42,4 +44,15 @@ void Game::spawn_enemy(std::vector<Enemy>& enemies) {
 
     }
 }
+
+//void Game::load_save_file(const std::string& save_file) {
+//    std::ifstream save;
+//    save.open(save_file);
+//
+//    char aux;
+//    float value;
+//    while(save >> aux) {
+//        if(save.peek())
+//    }
+//}
 
