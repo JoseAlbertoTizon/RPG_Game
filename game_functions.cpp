@@ -44,10 +44,15 @@ void Game::spawn_enemy(std::vector<Enemy>& enemies) {
     }
 }
 
-void Game::load(const std::string& save_data) {
+void Game::load() {
     is_loading = true;
     std::fstream save_file;
     save_file.open(save_data);
+    if(not save_file.is_open()) {
+        is_loading = false;
+        return;
+    }
+
     save_data_map["character_standing_circle: "] = read_value_from_line(save_file);
     save_data_map["character_health: "] = read_value_from_line(save_file);
     save_data_map["character_coins: "] = read_value_from_line(save_file);
@@ -70,5 +75,10 @@ void Game::load(const std::string& save_data) {
     }
     save_data_map["game_difficulty: "] = read_value_from_line(save_file);
 }
+
+void Game::read_save_from(std::string save_file){
+    save_data = save_file;
+}
+
 
 

@@ -17,6 +17,15 @@ Pause::Pause(){
     bluecircle6 = new sf::Sprite();
     bluecircle7 = new sf::Sprite();
     image_circle = new sf::Texture();
+    image_speed = new sf::Texture();
+    image_damage = new sf::Texture();
+    speed1 = new sf::Sprite();
+    damage2 = new sf::Sprite();
+    damage3 = new sf::Sprite();
+    speed4 = new sf::Sprite();
+    speed5 = new sf::Sprite();
+    damage6 = new sf::Sprite();
+    damage7 = new sf::Sprite();
 
     setvalues();
 };
@@ -36,6 +45,15 @@ Pause::~Pause(){
     delete bluecircle6;
     delete bluecircle7;
     delete image_circle;
+    delete image_speed;
+    delete image_damage;
+    delete speed1;
+    delete damage2;
+    delete damage3;
+    delete speed4;
+    delete speed5;
+    delete damage6;
+    delete damage7;
 }
 
 void Pause::setvalues() {
@@ -46,6 +64,8 @@ void Pause::setvalues() {
     font->loadFromFile("SNAP____.TTF");
     image->loadFromFile("pausebackground.png");
     image_circle->loadFromFile("bluecircle.png");
+    image_speed->loadFromFile("runner.png");
+    image_damage->loadFromFile("gun.png");
 
     bg->setTexture(*image);
 
@@ -99,9 +119,31 @@ void Pause::setvalues() {
     bluecircle7->setTexture(*image_circle);
     bluecircle7->setPosition(450,278);
     bluecircle7->setScale(0.05,0.05);
+
+    speed1->setTexture(*image_speed);
+    speed1->setPosition(303,63);
+    speed1->setScale(0.11,0.11);
+    damage2->setTexture(*image_damage);
+    damage2->setPosition(227,170);
+    damage2->setScale(0.11,0.11);
+    damage3->setTexture(*image_damage);
+    damage3->setPosition(380,171);
+    damage3->setScale(0.11,0.11);
+    speed4->setTexture(*image_speed);
+    speed4->setPosition(143,273);
+    speed4->setScale(0.11,0.11);
+    speed5->setTexture(*image_speed);
+    speed5->setPosition(255,277);
+    speed5->setScale(0.11,0.11);
+    damage6->setTexture(*image_damage);
+    damage6->setPosition(345,276);
+    damage6->setScale(0.11,0.11);
+    damage7->setTexture(*image_damage);
+    damage7->setPosition(450,278);
+    damage7->setScale(0.11,0.11);
 }
 
-Game::PauseOption Pause::search_for_events(sf::RenderWindow& window, sf::Event event) {
+Game::PauseOption Pause::search_for_events(sf::RenderWindow& window, sf::Event event, Character& character) {
     pos_mouse = sf::Mouse::getPosition(window);
     mouse_cord = window.mapPixelToCoords(pos_mouse);
 
@@ -139,47 +181,63 @@ Game::PauseOption Pause::search_for_events(sf::RenderWindow& window, sf::Event e
         if (winclose->getGlobalBounds().contains(mouse_cord)) {
             window.close();
         }
-        if(bluecircle1->getGlobalBounds().contains(mouse_cord) and not boost_tree.root->was_bought) {
-            boost_tree.root->was_bought = true;
-            bluecircle1->setColor(sf::Color::Green);
-            boost_tree.LevelWalking();
-            return boost_tree.root->boost;
-        }
-        if(bluecircle2->getGlobalBounds().contains(mouse_cord) and boost_tree.root->was_bought and not boost_tree.root->lchild->was_bought) {
-            boost_tree.root->lchild->was_bought = true;
-            bluecircle2->setColor(sf::Color::Green);
-            boost_tree.LevelWalking();
-            return boost_tree.root->lchild->boost;
-        }
-        if(bluecircle3->getGlobalBounds().contains(mouse_cord) and boost_tree.root->was_bought and not boost_tree.root->rchild->was_bought){
-            boost_tree.root->rchild->was_bought = true;
-            bluecircle3->setColor(sf::Color::Green);
-            boost_tree.LevelWalking();
-            return boost_tree.root->rchild->boost;
-        }
-        if(bluecircle4->getGlobalBounds().contains(mouse_cord) and boost_tree.root->lchild->was_bought and not boost_tree.root->lchild->lchild->was_bought){
-            boost_tree.root->lchild->lchild->was_bought = true;
-            bluecircle4->setColor(sf::Color::Green);
-            boost_tree.LevelWalking();
-            return boost_tree.root->lchild->lchild->boost;
-        }
-        if(bluecircle5->getGlobalBounds().contains(mouse_cord) and boost_tree.root->lchild->was_bought and not boost_tree.root->lchild->rchild->was_bought) {
-            boost_tree.root->lchild->rchild->was_bought = true;
-            bluecircle5->setColor(sf::Color::Green);
-            boost_tree.LevelWalking();
-            return boost_tree.root->lchild->rchild->boost;
-        }
-        if(bluecircle6->getGlobalBounds().contains(mouse_cord) and boost_tree.root->rchild->was_bought and not boost_tree.root->rchild->lchild->was_bought){
-            boost_tree.root->rchild->lchild->was_bought = true;
-            bluecircle6->setColor(sf::Color::Green);
-            boost_tree.LevelWalking();
-            return boost_tree.root->rchild->lchild->boost;
-        }
-        if(bluecircle7->getGlobalBounds().contains(mouse_cord) and boost_tree.root->rchild->was_bought and not boost_tree.root->rchild->rchild->was_bought){
-            boost_tree.root->rchild->rchild->was_bought = true;
-            bluecircle7->setColor(sf::Color::Green);
-            boost_tree.LevelWalking();
-            return boost_tree.root->rchild->rchild->boost;
+
+        if(character.coins >= 50) {
+            if (bluecircle1->getGlobalBounds().contains(mouse_cord) and not boost_tree.root->was_bought) {
+                character.add_coins(-50);
+                boost_tree.root->was_bought = true;
+                bluecircle1->setColor(sf::Color::Green);
+                boost_tree.LevelWalking();
+                return boost_tree.root->boost;
+            }
+            if (bluecircle2->getGlobalBounds().contains(mouse_cord) and boost_tree.root->was_bought and
+                not boost_tree.root->lchild->was_bought) {
+                character.add_coins(-50);
+                boost_tree.root->lchild->was_bought = true;
+                bluecircle2->setColor(sf::Color::Green);
+                boost_tree.LevelWalking();
+                return boost_tree.root->lchild->boost;
+            }
+            if (bluecircle3->getGlobalBounds().contains(mouse_cord) and boost_tree.root->was_bought and
+                not boost_tree.root->rchild->was_bought) {
+                character.add_coins(-50);
+                boost_tree.root->rchild->was_bought = true;
+                bluecircle3->setColor(sf::Color::Green);
+                boost_tree.LevelWalking();
+                return boost_tree.root->rchild->boost;
+            }
+            if (bluecircle4->getGlobalBounds().contains(mouse_cord) and boost_tree.root->lchild->was_bought and
+                not boost_tree.root->lchild->lchild->was_bought) {
+                character.add_coins(-50);
+                boost_tree.root->lchild->lchild->was_bought = true;
+                bluecircle4->setColor(sf::Color::Green);
+                boost_tree.LevelWalking();
+                return boost_tree.root->lchild->lchild->boost;
+            }
+            if (bluecircle5->getGlobalBounds().contains(mouse_cord) and boost_tree.root->lchild->was_bought and
+                not boost_tree.root->lchild->rchild->was_bought) {
+                character.add_coins(-50);
+                boost_tree.root->lchild->rchild->was_bought = true;
+                bluecircle5->setColor(sf::Color::Green);
+                boost_tree.LevelWalking();
+                return boost_tree.root->lchild->rchild->boost;
+            }
+            if (bluecircle6->getGlobalBounds().contains(mouse_cord) and boost_tree.root->rchild->was_bought and
+                not boost_tree.root->rchild->lchild->was_bought) {
+                character.add_coins(-50);
+                boost_tree.root->rchild->lchild->was_bought = true;
+                bluecircle6->setColor(sf::Color::Green);
+                boost_tree.LevelWalking();
+                return boost_tree.root->rchild->lchild->boost;
+            }
+            if (bluecircle7->getGlobalBounds().contains(mouse_cord) and boost_tree.root->rchild->was_bought and
+                not boost_tree.root->rchild->rchild->was_bought) {
+                character.add_coins(-50);
+                boost_tree.root->rchild->rchild->was_bought = true;
+                bluecircle7->setColor(sf::Color::Green);
+                boost_tree.LevelWalking();
+                return boost_tree.root->rchild->rchild->boost;
+            }
         }
     }
     if(event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Right)
@@ -201,13 +259,21 @@ void Pause::draw_all(sf::RenderWindow& window) {
     window.draw(*bluecircle6);
     window.draw(*bluecircle7);
 
+    window.draw(*speed1);
+    window.draw(*damage2);
+    window.draw(*damage3);
+    window.draw(*speed4);
+    window.draw(*speed5);
+    window.draw(*damage6);
+    window.draw(*damage7);
+
 //    for(int i = 0; i < 7; ++i)
 //        window.draw(*bluecircle[i]);
     window.display();
 }
 
-Game::PauseOption Pause::RunPause(sf::RenderWindow& window, sf::Event event) {
+Game::PauseOption Pause::RunPause(sf::RenderWindow& window, sf::Event event, Character& character) {
     draw_all(window);
-    return search_for_events(window, event);
+    return search_for_events(window, event, character);
 }
 

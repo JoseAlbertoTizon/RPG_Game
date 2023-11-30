@@ -22,9 +22,9 @@ Graph::Graph() {
     vertices[7].setPosition(400, 400);
     vertices[8].setPosition(500, 300);
     vertices[9].setPosition(500, 400);
-    vertices[10].setPosition(1000, 100);
-    vertices[11].setPosition(1000, 100);
-    vertices[12].setPosition(1000, 100);
+    vertices[10].setPosition(600, 600);
+    vertices[11].setPosition(600, 200);
+    vertices[12].setPosition(270, 270);
 
     for(int i = 0; i < 12; ++ i)
         for(int j = 0; j < 12; ++ j) {

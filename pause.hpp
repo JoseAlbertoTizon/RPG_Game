@@ -24,6 +24,15 @@ class Pause{
     sf::Sprite * bluecircle7;
     sf::Texture * image_circle;
     //std::vector<sf::Sprite*> bluecircle{7};
+    sf::Texture * image_speed;
+    sf::Texture * image_damage;
+    sf::Sprite * speed1;
+    sf::Sprite * damage2;
+    sf::Sprite * damage3;
+    sf::Sprite * speed4;
+    sf::Sprite * speed5;
+    sf::Sprite * damage6;
+    sf::Sprite * damage7;
 
     sf::Vector2i pos_mouse;
     sf::Vector2f mouse_cord;
@@ -36,11 +45,11 @@ class Pause{
 
 protected:
     void setvalues();
-    Game::PauseOption search_for_events(sf::RenderWindow&, sf::Event);
+    Game::PauseOption search_for_events(sf::RenderWindow&, sf::Event, Character&);
     void draw_all(sf::RenderWindow&);
 
 public:
     Pause();
     ~Pause();
-    Game::PauseOption RunPause(sf::RenderWindow&, sf::Event);
+    Game::PauseOption RunPause(sf::RenderWindow&, sf::Event, Character&);
 };

@@ -14,11 +14,12 @@ public:
 
     Game();
 
+    void read_save_from(std::string);
+
     void loop();
 
 private:
     GameState gameState = MENU;
-
     MenuOption menuOption;
     PauseOption pauseOption;
 
@@ -34,9 +35,10 @@ private:
     void spawn_enemy(std::vector<Enemy>&);
 
     std::map<std::string, float> save_data_map;
+    std::string save_data;
 
     bool is_loading = false;
-    void load(const std::string&);
+    void load();
 };
 
 

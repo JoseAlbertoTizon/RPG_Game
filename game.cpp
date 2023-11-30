@@ -20,19 +20,13 @@ void Game::loop() {
     sf::Font font;
     font.loadFromFile("SNAP____.TTF");
     sf::RectangleShape close_button{sf::Vector2f(150, 60)};
-    sf::RectangleShape go_to_save_button{sf::Vector2f(150, 60)};
     close_button.setPosition(140, 400);
-    go_to_save_button.setPosition(380, 400);
     sf::Text close_text{"Close", font};
     close_text.setCharacterSize(25);
-    sf::Text go_to_save_text{"Last Save", font};
-    go_to_save_text.setCharacterSize(25);
     close_text.setPosition(160, 415);
-    go_to_save_text.setPosition(380, 410);
     close_text.setFillColor(sf::Color::Black);
-    go_to_save_text.setFillColor(sf::Color::Black);
     close_text.setOutlineColor(sf::Color::Red);
-    go_to_save_text.setOutlineColor(sf::Color::Red);
+
 
     // Credits screen
     sf::Font arial_font;
@@ -201,7 +195,7 @@ void Game::loop() {
                 auto &skeleton = skeletons[k];
                 sf::Vector2f dist_vector = character.position() - skeleton.position();
                 if (length(dist_vector) < 40)
-                    character.add_health(-0);
+                    character.add_health(-1);
                 for (auto &projectile: projectiles) {
                     dist_vector = projectile.position() - skeleton.position();
                     if (length(dist_vector) < 60)
@@ -273,7 +267,7 @@ void Game::loop() {
             }
             if(menuOption == Continue) {
                 gameState = RUNNING;
-                load("save_data.txt");
+                load();
             }
             if(menuOption == Credits) {
                 gameState = CREDITS;
@@ -298,13 +292,13 @@ void Game::loop() {
         }
 
         if(gameState == PAUSE) {
-            pauseOption = pause.RunPause(window, event);
+            pauseOption = pause.RunPause(window, event, character);
             if(pauseOption == Unpause)
                 gameState = RUNNING;
             if(pauseOption == Save) {
                 gameState = RUNNING;
                 save_file.close();
-                save_file.open("save_data.txt", std::fstream::out | std::fstream::trunc);
+                save_file.open(save_data, std::fstream::out | std::fstream::trunc);
                 character.save_state_to_file(save_file);
                 save_file << "number_of_enemies: " << skeletons.size() << "\n";
                 for(auto& skeleton: skeletons)
@@ -329,19 +323,13 @@ void Game::loop() {
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
                     if (close_button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                         window.close();
-                    if(go_to_save_button.getGlobalBounds().contains(mousePosition.x, mousePosition.y)) {
-                        gameState = RUNNING;
-                        load("save_data.txt");
-                    }
                 }
             }
 
             window.clear();
 
             window.draw(close_button);
-            window.draw(go_to_save_button);
             window.draw(close_text);
-            window.draw(go_to_save_text);
 
             window.display();
         }
