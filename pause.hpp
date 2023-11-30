@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "game.hpp"
 
-class Menu{
+class Pause{
 
     int pos;
     bool pressed, the_selected;
@@ -23,12 +23,11 @@ class Menu{
 
 protected:
     void setvalues();
-    Game::MenuOption search_for_events(sf::RenderWindow&, sf::Event);
+    Game::PauseOption search_for_events(sf::RenderWindow&, sf::Event);
     void draw_all(sf::RenderWindow&);
 
 public:
-    Menu();
-    ~Menu();
-    Game::MenuOption RunMenu(sf::RenderWindow&, sf::Event);
-
+    Pause();
+    ~Pause();
+    Game::PauseOption RunPause(sf::RenderWindow&, sf::Event);
 };

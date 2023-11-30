@@ -36,6 +36,8 @@ public:
     int coins = 0;
     void add_coins(int);
 
+    int damage = 5;
+
     std::vector<sf::RectangleShape> health_bar;
     Object heart;
     int health = 200, max_health = 200;

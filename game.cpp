@@ -3,14 +3,18 @@
 #include "graph.hpp"
 #include "utility.hpp"
 #include "menu.hpp"
+#include "pause.hpp"
 #include <cmath>
 #include <iostream>
 
 void Game::loop() {
     load_all_textures();
 
-    // Create menu
+    // Create menu interface
     Menu menu;
+
+    // Create pause interface
+    Pause pause;
 
     // Death screen
     sf::Font font;
@@ -73,9 +77,6 @@ void Game::loop() {
                             not character.is_moving) {
                             character.path = graph.find_minimum_path(character.from_circle, k);
                             if (not character.path.empty() and *(character.path.end() - 1) != character.from_circle) {
-//                                for(auto x: character.path)
-//                                    std::cout << x << " ";
-//                                std::cout << "\n";
                                 character.is_moving = true;
                                 character.to_circle = character.path[1];
                             }
@@ -129,6 +130,9 @@ void Game::loop() {
                 graph.save_to_file(save_file);
                 save_file << "game_difficulty: " << difficulty << "\n";
             }
+
+            if(event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Down and gameState != DEAD)
+                gameState = PAUSE;
 
             if(is_loading) {
                 character.from_circle = (int)save_data_map["character_standing_circle: "];
@@ -200,7 +204,7 @@ void Game::loop() {
                 for (auto &projectile: projectiles) {
                     dist_vector = projectile.position() - skeleton.position();
                     if (length(dist_vector) < 60)
-                        skeleton.add_health(-5);
+                        skeleton.add_health(-character.damage);
                 }
 
                 skeleton.move_to(character.position().x, character.position().y);
@@ -260,6 +264,25 @@ void Game::loop() {
             if(menuOption == Continue) {
                 gameState = RUNNING;
                 load("save_data.txt");
+            }
+        }
+
+        if(gameState == PAUSE) {
+            pauseOption = pause.RunPause(window, event);
+            if(pauseOption == Unpause)
+                gameState = RUNNING;
+            if(pauseOption == Save) {
+                gameState = RUNNING;
+                load("save_data.txt");
+            }
+            if(pauseOption == Exit) {
+                window.close();
+            }
+            if(pauseOption == AddSpeed) {
+                character.speed *= 1.2;
+            }
+            if(pauseOption == AddDamage) {
+                character.damage += 1;
             }
         }
 

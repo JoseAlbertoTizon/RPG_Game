@@ -10,6 +10,8 @@ public:
 
     enum MenuOption{Nothing, NewGame, Continue, Credits};
 
+    enum PauseOption{KeepPaused, Unpause, Save, Exit, AddSpeed, AddDamage};
+
     Game();
 
     void loop();
@@ -18,6 +20,7 @@ private:
     GameState gameState = MENU;
 
     MenuOption menuOption;
+    PauseOption pauseOption;
 
     sf::RenderWindow window{sf::VideoMode(670, 670), "RPG"};
 
