@@ -2,22 +2,35 @@
 
 #include <SFML/Graphics.hpp>
 #include "game.hpp"
+#include "BinaryTree.hpp"
 
 class Pause{
 
     int pos;
     bool pressed, the_selected;
 
+    BinaryTree boost_tree;
+
     sf::RectangleShape * winclose;
     sf::Font * font;
     sf::Texture * image;
     sf::Sprite * bg;
+    sf::Sprite * bluecircle1;
+    sf::Sprite * bluecircle2;
+    sf::Sprite * bluecircle3;
+    sf::Sprite * bluecircle4;
+    sf::Sprite * bluecircle5;
+    sf::Sprite * bluecircle6;
+    sf::Sprite * bluecircle7;
+    sf::Texture * image_circle;
+    //std::vector<sf::Sprite*> bluecircle{7};
 
     sf::Vector2i pos_mouse;
     sf::Vector2f mouse_cord;
 
     std::vector<const char *> options;
     std::vector<sf::Vector2f> coords;
+    std::vector<sf::Vector2f> coords_bluecircle;
     std::vector<sf::Text> texts;
     std::vector<std::size_t> sizes;
 

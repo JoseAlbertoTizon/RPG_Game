@@ -6,7 +6,7 @@
 
 class Game {
 public:
-    enum GameState{MENU, PAUSE, RUNNING, DEAD};
+    enum GameState{MENU, PAUSE, RUNNING, CREDITS, DEAD, WON};
 
     enum MenuOption{Nothing, NewGame, Continue, Credits};
 

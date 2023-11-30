@@ -68,7 +68,7 @@ void Game::load(const std::string& save_data) {
         save_file >> price;
         save_data_map["price_vertex_" + std::to_string(i) + ": "] = price;
     }
-    save_data_map["difficulty: "] = read_value_from_line(save_file);
+    save_data_map["game_difficulty: "] = read_value_from_line(save_file);
 }
 
 

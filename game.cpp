@@ -34,9 +34,16 @@ void Game::loop() {
     close_text.setOutlineColor(sf::Color::Red);
     go_to_save_text.setOutlineColor(sf::Color::Red);
 
+    // Credits screen
+    sf::Font arial_font;
+    arial_font.loadFromFile("ARIAL.ttf");
+    sf::Text credits_text{"Game Producers:\n\n\nJose Alberto Feijao Tizon \n\n Eduardo Santos Guerra \n\n Italo dos Santos Rabelo", arial_font};
+    credits_text.setPosition(200, 150);
+    credits_text.setCharacterSize(20);
+    credits_text.setFillColor(sf::Color::White);
+
     // Create game clocks
-    sf::Clock elapsed_time, mob_elapsed_time, spawn_clock;
-    sf::Clock time_after_last_save;
+    sf::Clock elapsed_time, mob_elapsed_time, spawn_clock, wave_clock;
 
     // Create save file
     std::fstream save_file;
@@ -57,6 +64,13 @@ void Game::loop() {
 
     // Create projectiles vector;
     std::vector<Object> projectiles;
+
+    // Wave text;
+    sf::Text wave;
+    wave.setFont(font);
+    wave.setCharacterSize(20);
+    wave.setPosition(30, 30);
+    wave.setString("Wave: " + std::to_string(1));
 
     int i = 0, j = 0;
 
@@ -99,9 +113,6 @@ void Game::loop() {
                             if (not graph.edges[character.from_circle][k] and character.coins >= graph.prices[k]) {
                                 character.add_coins(-graph.prices[k]);
                                 graph.add_edge(character.from_circle, k);
-                                if (difficulty < 10)
-                                    difficulty += 0.5;
-
                             }
                         }
                     }
@@ -119,17 +130,6 @@ void Game::loop() {
 
             if (character.health < 0)
                 gameState = DEAD;
-
-            if(event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Up and gameState != DEAD) {
-                save_file.close();
-                save_file.open("save_data.txt", std::fstream::out | std::fstream::trunc);
-                character.save_state_to_file(save_file);
-                save_file << "number_of_enemies: " << skeletons.size() << "\n";
-                for(auto& skeleton: skeletons)
-                    skeleton.save_state_to_file(save_file);
-                graph.save_to_file(save_file);
-                save_file << "game_difficulty: " << difficulty << "\n";
-            }
 
             if(event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Down and gameState != DEAD)
                 gameState = PAUSE;
@@ -160,8 +160,9 @@ void Game::loop() {
                     graph.price_texts[i].setString(std::to_string(graph.prices[i]));
                 }
 
-
                 difficulty = save_data_map["game_difficulty: "];
+                std::cout << difficulty << "\n";
+                wave.setString("Wave: " + std::to_string((int)(1 + difficulty)));
 
                 is_loading = false;
             }
@@ -200,7 +201,7 @@ void Game::loop() {
                 auto &skeleton = skeletons[k];
                 sf::Vector2f dist_vector = character.position() - skeleton.position();
                 if (length(dist_vector) < 40)
-                    character.add_health(-1);
+                    character.add_health(-0);
                 for (auto &projectile: projectiles) {
                     dist_vector = projectile.position() - skeleton.position();
                     if (length(dist_vector) < 60)
@@ -235,7 +236,14 @@ void Game::loop() {
                     projectiles.erase(projectiles.begin() + k);
             }
 
-            if (spawn_clock.getElapsedTime().asSeconds() >= 5 - difficulty / 2.5) {
+            if(wave_clock.getElapsedTime().asSeconds() >= 12) {
+                difficulty ++;
+                wave.setString("Wave: " + std::to_string((int)(1 + difficulty)));
+                if(difficulty == 10)
+                    gameState = WON;
+                wave_clock.restart();
+            }
+            if (spawn_clock.getElapsedTime().asSeconds() >= 5 - difficulty / 2) {
                 spawn_enemy(skeletons);
                 spawn_clock.restart();
             }
@@ -251,6 +259,7 @@ void Game::loop() {
                 skeleton.render(window);
             for (auto &projectile: projectiles)
                 window.draw(projectile.sprite);
+            window.draw(wave);
 
             window.display();
         }
@@ -259,12 +268,33 @@ void Game::loop() {
             menuOption = menu.RunMenu(window, event);
             if (menuOption == NewGame) {
                 gameState = RUNNING;
+                wave_clock.restart();
                 is_loading = false;
             }
             if(menuOption == Continue) {
                 gameState = RUNNING;
                 load("save_data.txt");
             }
+            if(menuOption == Credits) {
+                gameState = CREDITS;
+            }
+        }
+
+        if(gameState == CREDITS) {
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                    if (close_button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                        gameState = MENU;
+                }
+            }
+            window.clear();
+
+            window.draw(close_button);
+            window.draw(close_text);
+            window.draw(credits_text);
+
+            window.display();
         }
 
         if(gameState == PAUSE) {
@@ -273,7 +303,14 @@ void Game::loop() {
                 gameState = RUNNING;
             if(pauseOption == Save) {
                 gameState = RUNNING;
-                load("save_data.txt");
+                save_file.close();
+                save_file.open("save_data.txt", std::fstream::out | std::fstream::trunc);
+                character.save_state_to_file(save_file);
+                save_file << "number_of_enemies: " << skeletons.size() << "\n";
+                for(auto& skeleton: skeletons)
+                    skeleton.save_state_to_file(save_file);
+                graph.save_to_file(save_file);
+                save_file << "game_difficulty: " << difficulty << "\n";
             }
             if(pauseOption == Exit) {
                 window.close();
@@ -282,7 +319,7 @@ void Game::loop() {
                 character.speed *= 1.2;
             }
             if(pauseOption == AddDamage) {
-                character.damage += 1;
+                character.damage += 5;
             }
         }
 
@@ -308,5 +345,23 @@ void Game::loop() {
 
             window.display();
         }
+
+        if(gameState == WON) {
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                    if (close_button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                        window.close();
+                }
+            }
+
+            window.clear();
+
+            window.draw(close_button);
+            window.draw(close_text);
+
+            window.display();
+        }
+
     }
 }
