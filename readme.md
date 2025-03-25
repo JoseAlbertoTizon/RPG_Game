@@ -1,6 +1,6 @@
 # RPG_Game
 
-##This Project was made for our college exam. Our objective was to make a RPG game evolving graph and binarie tree, we used C++ 17 and SFML 2.6.1. librarie´s.
+##This Project was made for a college final exam. Our objective was to make a RPG game evolving graph and binary trees, we used C++ 17 and the library SFML 2.6.1.
 
 Table of Contents
 =================
@@ -9,8 +9,6 @@ Table of Contents
 * [Installation](#installation)
 * [How to Use](#How_to_use)
     * [Prerequisites](#prerequisites)
-    * [Local files](#local-files)
-    * [Remote files](#remote-files)
 <!--te-->
 
 ## About
@@ -34,15 +32,3 @@ Before using this project, ensure you have the following prerequisite installed:
 
 - We did this on windows and the IDE was CLion(2023.2.2 version), so we are going to show steps that we have done:
   -After downloading SFML, extract the paste and put on C´s directories
-
-### Local Files
-
-If you would like to have local background files used in the game presentation, follow these steps:
-
-1. Place your background files in the `...` directory.
-
-2. Ensure that the filenames are correctly referenced in your code.
-
-### Remote Files
-
-??
