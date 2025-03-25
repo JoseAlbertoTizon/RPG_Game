@@ -1,6 +1,6 @@
 # RPG_Game
 
-##This Project was made for a college final exam. Our objective was to make a RPG game evolving graph and binary trees, we used C++ 17 and the library SFML 2.6.1.
+##This Project was made for a college final exam. Our objective was to make a RPG game evolving graph and binary tree algorithms. Here, we implemented Dijkstra's algorithm to make the player move along the nodes, we used C++ 17 and the library SFML 2.6.1.
 
 Table of Contents
 =================
